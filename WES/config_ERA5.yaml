@@ -1,0 +1,45 @@
+# config.yaml
+input_file: '../data/ERA5.nc'
+input_times_freq: 1 #in hours
+ChSh_Coeff_file: '../data/Chebyshev_Coefficnents.nc'
+input_variables:
+  - 10ws
+  - 100ws
+  - 100alpha
+  - 975ws
+  - 950ws
+  - 975wsgrad
+  - 950wsgrad
+  - zust
+  - i10fg
+  - t2m
+  - skt
+  - stl1
+  - d2m
+  - msl
+  - blh
+  - ishf
+  - bld
+  - t_975
+  - t_950
+  - 2mtempgrad
+  - dewtempsprd
+  - 975tempgrad
+  - 950tempgrad
+  - sinJDAY
+
+target_variables: [0,1,2,3,4]
+train_years: 1
+
+train_locations: 
+  - 10
+
+nEns: 10
+tabnet_param_file : '../CI2024/tabnet_params_8th_set.csv'
+
+test_dates_range:
+  - '2017-03-24T00:00:00'
+  - '2018-04-11T23:00:00'
+
+test_locations: 
+  - 10

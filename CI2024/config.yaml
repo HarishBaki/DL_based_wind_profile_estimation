@@ -1,0 +1,100 @@
+# config.yaml
+input_file: 'data/ERA5.nc'
+input_times_freq: 1 #in hours
+ChSh_Coeff_file: 'data/Chebyshev_Coefficnents.nc'
+input_variables:
+  - 10ws
+  - 100ws
+  - 100alpha
+  - 975ws
+  - 950ws
+  - 975wsgrad
+  - 950wsgrad
+  - zust
+  - i10fg
+  - t2m
+  - skt
+  - stl1
+  - d2m
+  - msl
+  - blh
+  - cbh
+  - ishf
+  - ie
+  - tcc
+  - lcc
+  - cape
+  - cin
+  - bld
+  - t_975
+  - t_950
+  - 2mtempgrad
+  - sktempgrad
+  - dewtempsprd
+  - 975tempgrad
+  - 950tempgrad
+  - sinHR
+  - cosHR
+  - sinJDAY
+  - cosJDAY
+
+backup_variables:
+  - 10ws_delta1
+  - 10ws_delta2
+  - 10ws_delta3
+  - 10ws_delta4
+  - 10ws_delta5
+  - 10ws_delta6
+  - 100ws_delta1
+  - 100ws_delta2
+  - 100ws_delta3
+  - 100ws_delta4
+  - 100ws_delta5
+  - 100ws_delta6
+  - 975ws_delta1
+  - 975ws_delta2
+  - 975ws_delta3
+  - 975ws_delta4
+  - 975ws_delta5
+  - 975ws_delta6
+  - 950ws_delta1
+  - 950ws_delta2
+  - 950ws_delta3
+  - 950ws_delta4
+  - 950ws_delta5
+  - 950ws_delta6
+
+train_dates_range:
+  - '2000-01-01T00:00:00'
+  - '2000-12-31T23:00:00'
+
+train_locations:
+  - 0
+
+n_d: [4, 8, 16]
+
+n_steps: [3, 4, 5]
+
+n_independent: [1, 2, 3, 4, 5]
+
+n_shared: [1, 2, 3, 4, 5]
+
+gamma: [1.1, 1.2, 1.3, 1.4]
+
+nTrial: 100
+
+nEns: 10
+
+test_dates_range:
+  - '2017-01-01T00:00:00'
+  - '2017-12-31T23:00:00'
+
+test_locations:
+  - 10
+
+feature_importance:
+ - False
+
+number_of_features: [10,10,10,10,10]
+
+experiment: 8
