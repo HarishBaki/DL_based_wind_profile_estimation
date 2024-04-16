@@ -1,7 +1,7 @@
 # config.yaml
 input_file: '../data/ERA5.nc'
 input_times_freq: 1 #in hours
-ChSh_Coeff_file: '../data/Chebyshev_Coefficnents.nc'
+ChSh_Coeff_file: '../data/Heligoland_Chebyshev_Coefficnents.nc'
 input_variables:
   - 10ws
   - 100ws
