@@ -35,14 +35,17 @@ Z = np.array([10., 15., 30., 50., 75., 100., 150., 200., 250., 300., 400., 500.]
 poly_order = 4
 CPtype = 1
 
-def normalize(H):
+def normalize(H,ref_H=Z):
     '''
     Normalizes the height levels between -1 and 1
+    ref_H: A vector of reference height levels, in our case CERRA levels
     H: A vector of height levels
     '''
-    a = 2 / (np.max(H) - np.min(H))
-    b = - (np.max(H) + np.min(H)) / (np.max(H) - np.min(H))
-    Hn = a * H + b
+    a = 2 / (np.max(ref_H) - np.min(ref_H))
+    b = - (np.max(ref_H) + np.min(ref_H)) / (np.max(ref_H) - np.min(ref_H))
+    Hn = a * ref_H + b
+
+    Hn = np.interp(H, ref_H, Hn)
     return Hn
 
 def Chebyshev_Basu(x, poly_order, CPtype):
@@ -68,7 +71,7 @@ def Chebyshev_Basu(x, poly_order, CPtype):
                 CP[:, n] = 2 * x.flatten() * CP[:, n - 1] - CP[:, n - 2]
     return CP
 
-def Chebyshev_Coeff(H, U,p,CPtype):
+def Chebyshev_Coeff(H, U,p,CPtype,ref_H=None):
     '''
     This function computes the Chebyshev coefficients through inverse transform of system of linear equations
     H: height levels, in their useual units
@@ -103,12 +106,13 @@ def Chebyshev_Coeff(H, U,p,CPtype):
     Coeff = np.linalg.pinv(PL) @ Ua
     return Coeff
 
-def WindProfile(Z,Coeff):
+def WindProfile(Z,Coeff,ref_H=None):
     '''
     This function computes the full level wind profile provided vertical levels and the Chebyshev coefficients
     Z: height levels, in their useual units
     Coeff: Chebysev coefficients
     '''
+    # Normalize H
     Hn = normalize(Z)
     PL_full = Chebyshev_Basu(Hn, poly_order, CPtype)
     Mp = PL_full @ Coeff
@@ -200,7 +204,38 @@ def data_processing(input_file,ChSh_Coeff_file,input_times_freq,input_variables,
         Y = np.nan_to_num(Y)
 
         return X, Y
-    
+
+def data_processing_Heligoland(input_file,ChSh_Coeff_file,input_variables,target_variables, dates, locations):
+    '''
+    This function reads the nc files and converts them into numpy arrays in the required shape.
+    input_file: input variables file (either ERA5 or CERRA)
+    ChSh_Coeff_file: target variables file (Chebyshev coefficients file)
+    input_time_freq: time frequency of the input variables, since the CERRA and ERA5 are not at the same time frequencey
+    input_variables: names of the input variables
+    target_variables: target Chebyshev coefficients 
+    dates_range: range of the dates to read, can be training or testing
+    locations: location indices of the data, out of 11
+    var_arg: whether the function should return validation data also along with training, or only training, or testing
+    '''
+    inputs = xr.open_dataset(input_file)
+    ChSh_Coeff = xr.open_dataset(ChSh_Coeff_file)
+
+    X = np.empty((0, len(input_variables)))
+    Y = np.empty((0, len(target_variables)))
+
+    for loc in locations:
+        # --- testing ---#
+        X_loc = inputs[input_variables].sel(time=dates).sel(location=loc).to_array().values.T
+        X = np.concatenate((X, X_loc), axis=0)
+        Y_loc = ChSh_Coeff.sel(time=dates).sel(coeff=target_variables).to_array().values
+        Y = np.concatenate((Y, Y_loc[0,:,:]), axis=0)
+
+    # Replace NaN values with zeros
+    X = np.nan_to_num(X)
+    Y = np.nan_to_num(Y)
+
+    return X, Y
+
 nELI5max = 1 #FIXME
 def myELI5(model,X,y,multiout=None,target_variable=None):
     '''
