@@ -32,7 +32,7 @@ from plotters import *
 # === gather variables provided as input arguments ===
 config_file = sys.argv[1] 
 Ens = int(sys.argv[2]) #ensemble number
-experiment = 'Heligoland_Basu_Coeff'
+experiment = 'Heligoland_Basu_Coeff_no_normalization'
 
 # === load yaml file and extract variables ===
 with open(config_file, 'r') as yaml_file:
@@ -90,15 +90,19 @@ print('Training inputs shape:',X_train.shape,'training targets shape:',Y_train.s
 print('Validation inputs shape:',X_valid.shape,'validation targets shape:',Y_valid.shape)
 
 # === normalizing the training and validaiton data ---#
+'''
 min_max_scaler = preprocessing.MinMaxScaler().fit(Y_train)
 
 Y_train_trans = min_max_scaler.transform(Y_train)
 Y_valid_trans = min_max_scaler.transform(Y_valid)
+'''
+Y_train_trans = Y_train
+Y_valid_trans = Y_valid
 
 OUTPUT_DIR = f'trained_models/{experiment}/Ens_{Ens}'
 os.system(f'mkdir -p {OUTPUT_DIR}')
 # --- save the normalizing function ---#
-joblib.dump(min_max_scaler, f'{OUTPUT_DIR}/min_max_scaler.joblib')
+#oblib.dump(min_max_scaler, f'{OUTPUT_DIR}/min_max_scaler.joblib')
 
 # === load tabnet parameters ===
 tabnet_params = pd.read_csv(tabnet_param_file)
@@ -143,7 +147,9 @@ ax.set_xlabel('Epochs')
 ax.set_ylabel('RMSE')
 ax.legend()
 
-Y_pred = min_max_scaler.inverse_transform(tabReg.predict(X_valid))
+Y_pred = tabReg.predict(X_valid)
+#Y_pred = min_max_scaler.inverse_transform(Y_pred)
+
 for j,target_variable in enumerate(target_variables):
     hexbin_plotter(fig,gs[j+1],Y_valid[:,target_variable],Y_pred[:,target_variable],f'Coefficient {target_variable}',text_arg=True)
 fig.suptitle(f"n_d:{n_d}, n_a:{n_a}, n_steps:{n_steps}, n_independent:{n_independent}, n_shared:{n_shared}, gamma:{gamma}")
