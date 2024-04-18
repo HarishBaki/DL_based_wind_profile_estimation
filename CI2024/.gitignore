@@ -1,0 +1,9 @@
+Figures/
+featimp_coefficients/
+Wind_profiles_movie/
+trained_models/
+TabNet.py
+Progress.pptx
+config_CERRA.yaml
+tabnet_params_12th_set.csv
+tabnet_params_8th_set.csv
