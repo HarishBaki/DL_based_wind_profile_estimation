@@ -20,7 +20,8 @@ To use this project, follow these steps:
 1. The TabNet_multioutput.py file contails all the necessary script to run tabnet.
 2. This file requires three inputs, one is a config_file, another what are the target variables you want to train, and the ensemble number
 3. An example of execution is  python TabNet_multioutput.py "config.yaml" "[0,1,2,3,4]" "0"
-4. In addition, a bash script is provided run_all_TabNet.sh, which can run 9 ensemble runs in parallel. 
+4. In addition, a bash script is provided run_all_TabNet.sh, which can run 9 ensemble runs in parallel.
+5. The CI2024_plots notebook provides some illustrations used for the publication.
 
 ## Contributing
 
