@@ -97,4 +97,4 @@ feature_importance:
 
 number_of_features: [10,10,10,10,10]
 
-experiment: 8
+experiment: 12
