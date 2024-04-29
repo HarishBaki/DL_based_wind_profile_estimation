@@ -10,7 +10,7 @@ A complete description of the project will be published in the article title "Es
 
 To run this project locally, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/your-username/CI2024.git`
+1. Clone the repository: `git clone https://github.com/HarishBaki/CI2024.git`
 2. Install the required conda dependencies: Install through the TabNet.yml conda environment file
 
 ## Usage
