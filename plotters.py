@@ -10,7 +10,7 @@ from sklearn.metrics import r2_score as R2
 
 from libraries import *
 
-def hexbin_plotter(fig,gs,Y,pred,title,text_arg=None,xlabel_arg=None,ylabel_arg=None):
+def hexbin_plotter(fig,gs,Y,pred,title,text_arg=None,xlabel=None,ylabel=None):
     '''
     Plots hebxin between true and predictions of Y
     fig: figure handle
@@ -33,10 +33,10 @@ def hexbin_plotter(fig,gs,Y,pred,title,text_arg=None,xlabel_arg=None,ylabel_arg=
         ax_hexbin.text(0.05, 0.93, f'MAE: {errMAE:.2f} \n$R^2$: {errR2:.2f}\nRMSE: {errRMSE:.2f} \nMAPE: {errMAPE:.2f}',
                       transform=ax_hexbin.transAxes, verticalalignment='top', bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
     
-    if xlabel_arg:
-        ax_hexbin.set_xlabel(f'observed coefficient')
-    if ylabel_arg:
-        ax_hexbin.set_ylabel(f'Predicted coefficient')
+    if xlabel:
+        ax_hexbin.set_xlabel(xlabel)
+    if ylabel:
+        ax_hexbin.set_ylabel(ylabel)
     ax_hexbin.set_title(f'{title}')
 
     min_value = Y.min()
