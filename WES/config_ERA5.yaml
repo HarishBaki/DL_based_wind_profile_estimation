@@ -1,7 +1,7 @@
 # config.yaml
 input_file: '../data/ERA5.nc'
 input_times_freq: 1 #in hours
-Coeff_file: '../data/Heligoland_Basu_Coefficnents.nc'
+Coeff_file: '../data/Heligoland_Chebyshev_Coefficnents.nc'
 input_variables:
   - 10ws
   - 100ws
@@ -28,8 +28,8 @@ input_variables:
   - 950tempgrad
   - sinJDAY
 
-target_variables: [0,1,2]
-train_years: 1
+target_variables: [0,1,2,3,4]
+train_years: 17
 
 train_locations: 
   - 10
