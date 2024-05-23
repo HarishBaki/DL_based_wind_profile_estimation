@@ -132,7 +132,7 @@ def Basu_Coeff(z,u):
     popt, pcov = curve_fit(Basu_WindProfile, z, u, p0=[1, 1, 1])  # p0 are initial guesses for parameters a, b, and c
     return popt
 
-def data_processing(input_file,ChSh_Coeff_file,input_times_freq,input_variables,target_variables, dates_range, locations,val_arg=None):
+def data_processing(input_file,ChSh_Coeff_file,input_times_freq,input_variables,target_variables, dates_range, locations,val_arg=None,profiles_file=None,threshold=1):
     '''
     This function reads the nc files and converts them into numpy arrays in the required shape.
     input_file: input variables file (either ERA5 or CERRA)
@@ -146,6 +146,8 @@ def data_processing(input_file,ChSh_Coeff_file,input_times_freq,input_variables,
     '''
     inputs = xr.open_dataset(input_file)
     ChSh_Coeff = xr.open_dataset(ChSh_Coeff_file)
+    if profiles_file is not None:
+        profiles = xr.open_dataset(profiles_file)
 
     if val_arg:
         #=== Extracting training and validation indices ===# 
@@ -160,6 +162,9 @@ def data_processing(input_file,ChSh_Coeff_file,input_times_freq,input_variables,
                     start_index = np.random.choice(len(month_indices) - int(6*24/input_times_freq) - 1)
                     validation_indices = month_indices[start_index:start_index + int(6*24/input_times_freq)]
                     validation_times[validation_indices] = True
+                else:
+                    # Skip the month if not enough data is available
+                    continue
         
         #=== Finish Extracting training and validation indices ===# 
         X_train = np.empty((0, len(input_variables)))
@@ -170,15 +175,54 @@ def data_processing(input_file,ChSh_Coeff_file,input_times_freq,input_variables,
         for loc in locations:
             # --- training ---#
             X_loc = inputs[input_variables].sel(time=slice(*dates_range)).sel(time=~validation_times, location=loc).to_array().values.T
+            Y_loc = ChSh_Coeff.sel(time=slice(*dates_range,input_times_freq)).sel(coeff=target_variables,time=~validation_times, obs=loc).to_array().values[0,...]
+            
+            # --- Exclude profiles below threshold ---#
+            if profiles_file is not None:
+                indices_below_threshold = np.where(np.sqrt(
+                np.mean(
+                    (
+                        inputs[['10ws','100ws']]
+                        .sel(time=slice(*dates_range))
+                        .sel(time=~validation_times, location=loc)
+                        .to_array()
+                        .values.T - profiles.data
+                        .sel(time=slice(*dates_range))
+                        .sel(time=~validation_times, obs=loc, heightAboveGround=[10.0, 100.])
+                        .values
+                    )**2,
+                    axis=1
+                )
+                )< threshold)[0]
+                X_loc = X_loc[indices_below_threshold]
+                Y_loc = Y_loc[indices_below_threshold]
             X_train = np.concatenate((X_train, X_loc), axis=0)
-            Y_loc = ChSh_Coeff.sel(time=slice(*dates_range,input_times_freq)).sel(coeff=target_variables,time=~validation_times, obs=loc).to_array().values
-            Y_train = np.concatenate((Y_train, Y_loc[0,:,:]), axis=0)
+            Y_train = np.concatenate((Y_train, Y_loc), axis=0)
     
             # --- vlaidation ---#
             X_loc = inputs[input_variables].sel(time=slice(*dates_range)).sel(time=validation_times, location=loc).to_array().values.T
+            Y_loc = ChSh_Coeff.sel(time=slice(*dates_range,input_times_freq)).sel(coeff=target_variables,time=validation_times, obs=loc).to_array().values[0,...]
+            # --- Exclude profiles below threshold ---#
+            if profiles_file is not None:
+                indices_below_threshold = np.where(np.sqrt(
+                np.mean(
+                    (
+                        inputs[['10ws','100ws']]
+                        .sel(time=slice(*dates_range))
+                        .sel(time=validation_times, location=loc)
+                        .to_array()
+                        .values.T - profiles.data
+                        .sel(time=slice(*dates_range))
+                        .sel(time=validation_times, obs=loc, heightAboveGround=[10.0, 100.])
+                        .values
+                    )**2,
+                    axis=1
+                )
+                )< threshold)[0]
+                X_loc = X_loc[indices_below_threshold]
+                Y_loc = Y_loc[indices_below_threshold]
             X_valid = np.concatenate((X_valid, X_loc), axis=0)
-            Y_loc = ChSh_Coeff.sel(time=slice(*dates_range,input_times_freq)).sel(coeff=target_variables,time=validation_times, obs=loc).to_array().values
-            Y_valid = np.concatenate((Y_valid, Y_loc[0,:,:]), axis=0)        
+            Y_valid = np.concatenate((Y_valid, Y_loc), axis=0)        
     
         # Replace NaN values with zeros
         X_train = np.nan_to_num(X_train)
@@ -205,7 +249,7 @@ def data_processing(input_file,ChSh_Coeff_file,input_times_freq,input_variables,
 
         return X, Y
 
-def data_processing_Heligoland(input_file,ChSh_Coeff_file,input_variables,target_variables, dates, locations):
+def data_processing_Heligoland(input_file,Coeff_file,input_times_freq,input_variables,target_variables, dates_range, locations,val_arg=None,profiles_file=None,threshold=1):
     '''
     This function reads the nc files and converts them into numpy arrays in the required shape.
     input_file: input variables file (either ERA5 or CERRA)
@@ -218,23 +262,65 @@ def data_processing_Heligoland(input_file,ChSh_Coeff_file,input_variables,target
     var_arg: whether the function should return validation data also along with training, or only training, or testing
     '''
     inputs = xr.open_dataset(input_file)
-    ChSh_Coeff = xr.open_dataset(ChSh_Coeff_file)
+    coeff = xr.open_dataset(Coeff_file)
 
-    X = np.empty((0, len(input_variables)))
-    Y = np.empty((0, len(target_variables)))
+    if val_arg:
+        #=== Extracting training and validation indices ===# 
+        time_coord = coeff.sel(time=slice(*dates_range)).coords['time'] # this is necessary since the time dimension is not the same in the input and target files
 
-    for loc in locations:
-        # --- testing ---#
-        X_loc = inputs[input_variables].sel(time=dates).sel(location=loc).to_array().values.T
-        X = np.concatenate((X, X_loc), axis=0)
-        Y_loc = ChSh_Coeff.sel(time=dates).sel(coeff=target_variables).to_array().values
-        Y = np.concatenate((Y, Y_loc[0,:,:]), axis=0)
+        years = time_coord.dt.year
+        months = time_coord.dt.month
+        validation_times = np.zeros(len(time_coord), dtype=bool)
+        for year in np.unique(years):
+            for month in range(1, 13):
+                # check if you have enough data in the month
+                month_indices = np.where((years == year) & (months == month))[0]
+                if len(month_indices) >= int(6*24/input_times_freq):
+                    start_index = np.random.choice(len(month_indices) - int(6*24/input_times_freq) - 1)
+                    validation_indices = month_indices[start_index:start_index + int(6*24/input_times_freq)]
+                    validation_times[validation_indices] = True
+                else:
+                    # Skip the month if not enough data is available
+                    continue
+        
+        #=== Finish Extracting training and validation indices ===#
+        X_train = np.empty((0, len(input_variables)))
+        Y_train = np.empty((0, len(target_variables)))
+        X_valid = np.empty((0, len(input_variables)))
+        Y_valid = np.empty((0, len(target_variables)))
 
-    # Replace NaN values with zeros
-    X = np.nan_to_num(X)
-    Y = np.nan_to_num(Y)
+        for loc in locations:
+            # --- training ---#
+            X_loc = inputs[input_variables].sel(time=time_coord).sel(time=~validation_times,location=loc).to_array().values.T
+            Y_loc = coeff.sel(time=time_coord).sel(time=~validation_times,coeff=target_variables).to_array().values[0,...]
+            X_train = np.concatenate((X_train, X_loc), axis=0)
+            Y_train = np.concatenate((Y_train, Y_loc), axis=0)
 
-    return X, Y
+            # --- vlaidation ---#
+            X_loc = inputs[input_variables].sel(time=time_coord).sel(time=validation_times,location=loc).to_array().values.T
+            Y_loc = coeff.sel(time=time_coord).sel(time=validation_times,coeff=target_variables).to_array().values[0,...]
+            X_valid = np.concatenate((X_valid, X_loc), axis=0)
+            Y_valid = np.concatenate((Y_valid, Y_loc), axis=0)
+            
+        return X_train, Y_train, X_valid, Y_valid
+    else:
+        time_coord = coeff.sel(time=slice(*dates_range)).coords['time'] # this is necessary since the time dimension is not the same in the input and target files
+
+        X = np.empty((0, len(input_variables)))
+        Y = np.empty((0, len(target_variables)))
+
+        for loc in locations:
+            # --- testing ---#
+            X_loc = inputs[input_variables].sel(time=time_coord).sel(location=loc).to_array().values.T
+            X = np.concatenate((X, X_loc), axis=0)
+            Y_loc = coeff.sel(time=time_coord).sel(coeff=target_variables).to_array().values[0,...]
+            Y = np.concatenate((Y, Y_loc), axis=0)
+
+        # Replace NaN values with zeros
+        X = np.nan_to_num(X)
+        Y = np.nan_to_num(Y)
+
+        return X, Y
 
 nELI5max = 1 #FIXME
 def myELI5(model,X,y,multiout=None,target_variable=None):

@@ -1,0 +1,62 @@
+Version=1.1.5-rc1
+ID System=WLS8-8
+ID Client=TU Braunschweig
+Localisation=Helgoland - AWI
+GPS Localisation=Lat:5410.6357N, Long:00753.5134E
+Comments=Institut fuer Flugfuehrung
+********************
+Acquisition Parameters:
+********************
+Sampling Frequency  (Hz)=250000000.000
+MAO Frequency (Hz)=68884000.000
+Nb Pulses / Ligne of Sight=90000
+Nb Points / Reflected Pulse=1293
+Reflected Pulse Start=296
+Reflected Pulse End=370
+Noise Window Start Point=0
+Nb Noise Windows=1
+Emitted Pulse Start Point=0
+Emitted Pulse End Point=75
+Nb High Pass Filter Points=5
+FFT Window Width (points)=64
+Scan Cone Angle (°)=14.973
+Max Error Probability=0.010
+Low Pass Filter CutOff Frequency (Hz)=90000000.000
+********************
+EDFA Parameters:
+********************
+Laser Diode 1 Current (mA)=350
+Laser Diode 2 Current (mA)=1950
+********************
+Drive Parameter:
+********************
+Rotation Angle (°)=90
+Drive Position (°)=180
+********************
+Digitizer Parameters:
+********************
+TriggerSource=1
+TriggerCoupling=0
+TriggerSlope=0
+TriggerLevel1=2000.000
+TriggerLevel2=0.000
+DelayTime=0.000
+Coupling=4
+Offset=0.000
+FullScale=1.000
+********************
+Measurements Parameters:
+********************
+Wavelength (nm)=1543.000
+ScanAngle (°)=14.973
+DirectionOffset (°)=0.000
+Declination (°)=35.000
+PitchAngle (°)=0.200
+RollAngle (°)=-0.400
+CNRThreshold=-28.000
+VrThreshold (m/s)=)1.750
+SigmaFreqThreshold (m/s)=)0.750
+WiperCNRThreshold=-23.000
+WiperAltitude (m)=70
+WiperDuration (ms)=1000.000
+Altitudes(m)=	40	50	60	70	80	90	100	120	140	160	180	200	220	240	260	280	300	320	340	360	380	400	450	500
