@@ -80,7 +80,7 @@ with open(f'{pretrained_OUTPUT_DIR}/{fSTR}', "rb") as f:
     tabReg = pickle.load(f)
 
 # Retrain model
-tabReg.optimizer_params['lr'] = 0.005
+tabReg.optimizer_params['lr'] = 0.0001
 tabReg.fit(X_train=X_train, y_train=Y_train_trans,
                         eval_set=[(X_train, Y_train_trans), (X_valid, Y_valid_trans)],
                         eval_name=['train', 'valid'],

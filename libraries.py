@@ -218,7 +218,7 @@ def data_processing(input_file,ChSh_Coeff_file,input_times_freq,input_variables,
                     )**2,
                     axis=1
                 )
-                )< threshold)[0]
+                )<= threshold)[0]
                 X_loc = X_loc[indices_below_threshold]
                 Y_loc = Y_loc[indices_below_threshold]
             X_valid = np.concatenate((X_valid, X_loc), axis=0)

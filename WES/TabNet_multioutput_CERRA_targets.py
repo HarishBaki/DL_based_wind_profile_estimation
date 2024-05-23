@@ -58,7 +58,7 @@ for run,year in enumerate(np.arange(2000,2017+1-train_years)):
     # === training and validation data parameters ===#
     X_train,Y_train, X_valid,Y_valid = data_processing(input_file,Coeff_file,input_times_freq,
                                                        input_variables,target_variables,train_dates_range,train_locations,val_arg=True,
-                                                       profiles_file=profiles_file,threshold=3)
+                                                       profiles_file=None,threshold=3)
     print('training inputs shape:',X_train.shape,'training targets shape:',Y_train.shape,'validation inputs shape:',X_valid.shape,'validation targets shape:',Y_valid.shape)
 
     

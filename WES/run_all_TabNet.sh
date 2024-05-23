@@ -6,7 +6,6 @@ for j in $(seq 0 9); do
     python TabNet_multioutput_lidar_targets.py "config_ERA5_to_obs.yaml" "$j" &
 done
 wait
-'
 
 # === multi output training CERRA tragets===#
 train_years=17 #(1 3 5 10 17)
@@ -18,6 +17,7 @@ for i in "${train_years[@]}"; do
     wait
 done
 wait
+'
 
 # === multi output retraining obs targets ===#
 for j in $(seq 0 9); do
