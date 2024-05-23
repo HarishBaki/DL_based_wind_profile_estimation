@@ -60,24 +60,24 @@ print('Training inputs shape:',X_train.shape,'training targets shape:',Y_train.s
 print('Validation inputs shape:',X_valid.shape,'validation targets shape:',Y_valid.shape)
 print('Testing inputs shape:',X_test.shape,'testing targets shape:',Y_test.shape)
 
-# === normalizing the training and validaiton data ---#
-min_max_scaler = preprocessing.MinMaxScaler().fit(Y_train)
-
-Y_train_trans = min_max_scaler.transform(Y_train)
-Y_valid_trans = min_max_scaler.transform(Y_valid)
-
 OUTPUT_DIR = f'trained_models/{experiment}/run_{run}/Ens_{Ens}'
 os.system(f'mkdir -p {OUTPUT_DIR}')
-# --- save the normalizing function ---#
-joblib.dump(min_max_scaler, f'{OUTPUT_DIR}/min_max_scaler.joblib')
 
 pretrained_experiment = 'ERA5_to_CERRA/17Y'
 pretrained_run = 0
 pretrained_OUTPUT_DIR = f'trained_models/{pretrained_experiment}/run_{pretrained_run}/Ens_{Ens}'
+# Load normalizer
+min_max_scaler = joblib.load(f'{pretrained_OUTPUT_DIR}/min_max_scaler.joblib')
 # Load model
 fSTR = f'TabNet_HOLDOUT_Ens_{str(Ens)}.pkl'
 with open(f'{pretrained_OUTPUT_DIR}/{fSTR}', "rb") as f:
     tabReg = pickle.load(f)
+
+# === normalizing the training and validaiton data ---#
+Y_train_trans = min_max_scaler.transform(Y_train)
+Y_valid_trans = min_max_scaler.transform(Y_valid)
+# --- save the normalizing function ---#
+joblib.dump(min_max_scaler, f'{OUTPUT_DIR}/min_max_scaler.joblib')
 
 # Retrain model
 tabReg.optimizer_params['lr'] = 0.0001
