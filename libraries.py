@@ -249,7 +249,7 @@ def data_processing(input_file,ChSh_Coeff_file,input_times_freq,input_variables,
 
         return X, Y
 
-def data_processing_Heligoland(input_file,Coeff_file,input_times_freq,input_variables,target_variables, dates_range, locations,val_arg=None,profiles_file=None,threshold=1):
+def data_processing_Heligoland(input_file,Coeff_file,input_times_freq,input_variables,target_variables, dates_range, locations,val_arg=None,profiles_file=None,threshold=1,CERRA_coeff_file=None):
     '''
     This function reads the nc files and converts them into numpy arrays in the required shape.
     input_file: input variables file (either ERA5 or CERRA)
@@ -308,6 +308,9 @@ def data_processing_Heligoland(input_file,Coeff_file,input_times_freq,input_vari
 
         X = np.empty((0, len(input_variables)))
         Y = np.empty((0, len(target_variables)))
+        if CERRA_coeff_file is not None:
+            CERRA_coeff = xr.open_dataset(CERRA_coeff_file)
+            Y_CERRA = np.empty((0, len(target_variables)))
 
         for loc in locations:
             # --- testing ---#
@@ -315,12 +318,20 @@ def data_processing_Heligoland(input_file,Coeff_file,input_times_freq,input_vari
             X = np.concatenate((X, X_loc), axis=0)
             Y_loc = coeff.sel(time=time_coord).sel(coeff=target_variables).to_array().values[0,...]
             Y = np.concatenate((Y, Y_loc), axis=0)
+            if CERRA_coeff_file is not None:
+                Y_loc_CERRA = CERRA_coeff.sel(time=time_coord).sel(coeff=target_variables,obs=loc).to_array().values[0,...]
+                Y_CERRA = np.concatenate((Y_CERRA, Y_loc_CERRA), axis=0)
 
         # Replace NaN values with zeros
         X = np.nan_to_num(X)
         Y = np.nan_to_num(Y)
 
-        return X, Y
+        if CERRA_coeff_file is not None:
+            Y_CERRA = np.nan_to_num(Y_CERRA)
+            return X, Y, Y_CERRA
+        else:
+            return X, Y
+
 
 nELI5max = 1 #FIXME
 def myELI5(model,X,y,multiout=None,target_variable=None):
