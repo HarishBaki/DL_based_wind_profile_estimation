@@ -1,7 +1,7 @@
 # config.yaml
-input_file: '../data/ERA5.nc'
+input_file: 'data/ERA5.nc'
 input_times_freq: 1 #in hours
-ChSh_Coeff_file: '../data/Chebyshev_Coefficnents.nc'
+ChSh_Coeff_file: 'data/Chebyshev_Coefficnents.nc'
 input_variables:
   - 10ws
   - 100ws
@@ -83,18 +83,11 @@ gamma: [1.1, 1.2, 1.3, 1.4]
 
 nTrial: 100
 
-nEns: 10
-
 test_dates_range:
   - '2001-01-01T00:00:00'
   - '2001-12-31T23:00:00'
 
 test_locations:
   - 0
-
-feature_importance:
- - False
-
-number_of_features: [10,10,10,10,10]
 
 experiment: 8

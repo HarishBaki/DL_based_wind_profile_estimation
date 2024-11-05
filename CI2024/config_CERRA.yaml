@@ -1,7 +1,7 @@
 # config.yaml
-input_file: 'data/CERRA.nc'
+input_file: 'CERRA.nc'
 input_times_freq: 3 #in hours
-ChSh_Coeff_file: 'data/Chebyshev_Coefficnents.nc'
+ChSh_Coeff_file: 'Chebyshev_Coefficnents.nc'
 input_variables:
   - 10ws
   - 100ws
