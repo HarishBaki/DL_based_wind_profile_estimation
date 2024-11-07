@@ -20,8 +20,7 @@ input_variables:
 
 target_variables: [0,1,2,3,4]
 
-train_locations: 
-  - 10
+train_locations: [0,1,2,3,4,5,6,7,9]
 
 nEns: 10
 tabnet_param_file : '../CI2024/tabnet_params_12th_set.csv'
@@ -30,7 +29,8 @@ test_dates_range:
   - '2017-03-24T00:00:00'
   - '2018-04-11T23:00:00'
 
-test_locations: 
-  - 10
+test_locations: [10]
 
 experiment: 'CERRA_to_CERRA'
+
+profiles_file:
