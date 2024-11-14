@@ -1,0 +1,54 @@
+# config.yaml
+input_file: 'data/CERRA.nc'
+input_times_freq: 3 #in hours
+ChSh_Coeff_file: 'data/Chebyshev_Coefficnents.nc'
+input_variables:
+  - 10ws
+  - 100ws
+  - 100alpha
+  - 975ws
+  - 950ws
+  - 975wsgrad
+  - 950wsgrad
+  - t2m
+  - skt
+  - t_975
+  - t_950
+  - 2mtempgrad
+  - 975tempgrad
+  - 950tempgrad
+
+train_dates_range:
+  - '2000-01-01T00:00:00'
+  - '2003-12-31T21:00:00'
+
+train_locations:
+  - 0
+
+n_d: [4, 8, 16]
+
+n_steps: [3, 4, 5]
+
+n_independent: [1, 2, 3, 4, 5]
+
+n_shared: [1, 2, 3, 4, 5]
+
+gamma: [1.1, 1.2, 1.3, 1.4]
+
+nTrial: 100
+
+nEns: 10
+
+test_dates_range:
+  - '2004-01-01T00:00:00'
+  - '2004-12-31T21:00:00'
+
+test_locations:
+  - 0
+
+feature_importance:
+ - False
+
+number_of_features: [10,10,10,10,10]
+
+experiment: 12
