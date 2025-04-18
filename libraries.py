@@ -30,12 +30,13 @@ from scipy.interpolate import interp1d
 
 # The following height levels are fixed at all time
 Z = np.array([10., 15., 30., 50., 75., 100., 150., 200., 250., 300., 400., 500.])
+ref_H = np.array([0, 10., 15., 30., 50., 75., 100., 150., 200., 250., 300., 400., 500.])
 
 # These variables are used while creating the Chebyshev coefficients
 poly_order = 4
 CPtype = 1
 
-def normalize(H,ref_H=Z):
+def normalize(H,ref_H=ref_H):
     '''
     Normalizes the height levels between -1 and 1
     ref_H: A vector of reference height levels, in our case CERRA levels
@@ -71,7 +72,7 @@ def Chebyshev_Basu(x, poly_order, CPtype):
                 CP[:, n] = 2 * x.flatten() * CP[:, n - 1] - CP[:, n - 2]
     return CP
 
-def Chebyshev_Coeff(H, U,p,CPtype,ref_H=None):
+def Chebyshev_Coeff(H, U,poly_order=poly_order,CPtype=CPtype,ref_H=ref_H):
     '''
     This function computes the Chebyshev coefficients through inverse transform of system of linear equations
     H: height levels, in their useual units
@@ -83,7 +84,7 @@ def Chebyshev_Coeff(H, U,p,CPtype,ref_H=None):
     U = U.flatten()
 
     # Normalize H
-    Hn = normalize(H)
+    Hn = normalize(H, ref_H=ref_H)
     
     # Remove NaN values
     Indx = np.where(~np.isnan(U))[0]
@@ -92,29 +93,29 @@ def Chebyshev_Coeff(H, U,p,CPtype,ref_H=None):
     N = len(Ua)
 
     # Linearly extrapolate wind values at the boundaries
-    spline_left = interp1d(Ha, Ua, kind='linear', fill_value='extrapolate')
-    Uax = spline_left([-1])
+    #spline_left = interp1d(Ha, Ua, kind='linear', fill_value='extrapolate')
+    #Uax = spline_left([-1])
 
-    spline_right = interp1d(Ha, Ua, kind='linear', fill_value='extrapolate')
-    Uay = spline_right([1])
-    Ua = np.concatenate([Uax, Ua, Uay])
-    Ha = np.concatenate([-1 + np.zeros(1), Ha, 1 + np.zeros(1)])
+    #spline_right = interp1d(Ha, Ua, kind='linear', fill_value='extrapolate')
+    #Uay = spline_right([1])
+    #Ua = np.concatenate([Uax, Ua, Uay])
+    #Ha = np.concatenate([-1 + np.zeros(1), Ha, 1 + np.zeros(1)])       # these two seems are unnecessary, which bring adidtional offset due to extrapolation.
     
     # Predict the gap-filled and denoised profile
-    PL = Chebyshev_Basu(Ha, p, CPtype)
+    PL = Chebyshev_Basu(Ha, poly_order=poly_order, CPtype=CPtype)
     # Compute the coefficients C
     Coeff = np.linalg.pinv(PL) @ Ua
     return Coeff
 
-def WindProfile(Z,Coeff,ref_H=None):
+def WindProfile(Z,Coeff, poly_order=poly_order, CPtype=CPtype,ref_H=ref_H):
     '''
     This function computes the full level wind profile provided vertical levels and the Chebyshev coefficients
     Z: height levels, in their useual units
     Coeff: Chebysev coefficients
     '''
     # Normalize H
-    Hn = normalize(Z)
-    PL_full = Chebyshev_Basu(Hn, poly_order, CPtype)
+    Hn = normalize(Z, ref_H=ref_H)
+    PL_full = Chebyshev_Basu(Hn, poly_order=poly_order, CPtype=CPtype)
     Mp = PL_full @ Coeff
     return Mp
 
